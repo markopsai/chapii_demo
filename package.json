@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@vapi-ai/server-sdk": "^0.10.0",
+    "@vapi-ai/web": "^2.3.9"
+  }
+}
