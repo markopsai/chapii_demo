@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AssistantsAPI, Assistant } from '@/lib/api/assistants.api';
 import { envConfig } from '@/config/env.config';
 
@@ -8,9 +8,12 @@ export function useAssistants() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const assistantsAPI = new AssistantsAPI(
-    envConfig.vapi.apiUrl,
-    envConfig.vapi.serverApiKey || envConfig.vapi.token
+  const assistantsAPI = useMemo(
+    () => new AssistantsAPI(
+      envConfig.vapi.apiUrl,
+      envConfig.vapi.serverApiKey || envConfig.vapi.token
+    ),
+    []
   );
 
   useEffect(() => {
@@ -23,8 +26,8 @@ export function useAssistants() {
         console.log("Fetched assistants:", fetchedAssistants);
         setAssistants(fetchedAssistants);
         
-        // Auto-select the first assistant if available
-        if (fetchedAssistants.length > 0 && !selectedAssistant) {
+        // Auto-select the first assistant if available and none selected
+        if (fetchedAssistants.length > 0) {
           console.log("Auto-selecting first assistant:", fetchedAssistants[0]);
           setSelectedAssistant(fetchedAssistants[0]);
         }
@@ -37,7 +40,7 @@ export function useAssistants() {
     };
 
     fetchAssistants();
-  }, []);
+  }, [assistantsAPI]);
 
   const selectAssistant = (assistantId: string) => {
     const assistant = assistants.find(a => a.id === assistantId);

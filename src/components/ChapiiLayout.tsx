@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useVapi, vapi } from '@/features/Assistant';
 import { useAssistants } from '@/features/Assistant/useAssistants';
 import { MessageList } from '@/features/Messages';
 import { ScrollArea } from '@/components/ui/ScrollArea';
-import { MessageTypeEnum, MessageRoleEnum, Message } from '@/lib/types/conversation.type';
+// Import only what we need - removed unused imports
 
 // Match Vapi dashboard structured data fields exactly
 interface VapiStructuredData {
@@ -68,23 +68,20 @@ export function ChapiiLayout() {
 
   // Debug: Log all Vapi events and fetch structured data
   useEffect(() => {
-    const handleCallEnd = async (callData: any) => {
-      console.log("📞 CALL ENDED - Raw data:", JSON.stringify(callData, null, 2));
-      console.log("📞 Available properties:", Object.keys(callData || {}));
-      console.log("📞 Call ID attempts:", {
-        id: callData?.id,
-        callId: callData?.callId,
-        call_id: callData?.call_id,
-        direct: callData
-      });
+    const handleCallEnd = async () => {
+      console.log("📞 CALL ENDED - No call data available from event");
+      // Note: Vapi call-end event doesn't provide call data directly
       
       // Try multiple wait times and call ID formats
       const tryFetchData = async (delay: number) => {
         setTimeout(async () => {
           try {
-            // Try multiple possible call ID locations
-            const callId = callData?.id || callData?.callId || callData?.call_id || callData;
-            console.log(`🔍 Attempt after ${delay}ms - Call ID:`, callId);
+            // For now, we'll need to get the call ID from another source
+            // since the call-end event doesn't provide it directly
+            console.log(`🔍 Attempt after ${delay}ms - Need to implement call ID tracking`);
+            
+            // TODO: Track call ID when call starts to use here
+            const callId = null; // Will implement call tracking
             
             if (callId && typeof callId === 'string') {
               console.log("📡 Fetching from Vapi API with server key...");
@@ -129,8 +126,8 @@ export function ChapiiLayout() {
                   setStructuredData(newStructuredData);
                   
                   const filledFields = Object.entries(newStructuredData)
-                    .filter(([_, value]) => value)
-                    .map(([key, _]) => key.toUpperCase());
+                    .filter(([, value]) => value)
+                    .map(([key]) => key.toUpperCase());
                   
                   if (filledFields.length > 0) {
                     showNotification(
@@ -160,7 +157,7 @@ export function ChapiiLayout() {
                 console.error("❌ API Response not OK:", response.status, await response.text());
               }
             } else {
-              console.log("❌ No valid call ID found:", callId);
+              console.log("❌ No call ID available - need to implement call tracking");
             }
           } catch (error) {
             console.error("❌ Error fetching structured data:", error);
@@ -174,15 +171,12 @@ export function ChapiiLayout() {
       tryFetchData(8000);  // 8 seconds
     };
     
-    // Listen for ALL Vapi events for debugging
-    const logAllEvents = (eventName: string, ...args: any[]) => {
-      console.log(`🎯 VAPI EVENT [${eventName}]:`, ...args);
-    };
+    // Listen for ALL Vapi events for debugging (removed unused function)
     
     // Log specific events
     vapi.on("call-end", handleCallEnd);
-    vapi.on("call-start", (data) => console.log("📞 CALL START:", data));
-    vapi.on("message", (data) => console.log("💬 MESSAGE:", data));
+    vapi.on("call-start", () => console.log("📞 CALL START"));
+    vapi.on("message", () => console.log("💬 MESSAGE"));
     
     return () => {
       vapi.off("call-end", handleCallEnd);

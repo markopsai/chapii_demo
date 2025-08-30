@@ -87,7 +87,6 @@ export function useVapi(selectedAssistant?: Assistant | null) {
       vapi.off("message", onMessageUpdate);
       vapi.off("error", onError);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const start = async () => {

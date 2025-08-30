@@ -50,7 +50,6 @@ export class DataExtractor {
 
   static extractFromTranscript(transcript: string, context: 'user' | 'assistant'): Partial<ExtractedData> {
     const extracted: Partial<ExtractedData> = {};
-    const lowerText = transcript.toLowerCase();
     
     // Only extract from user responses for now
     if (context !== 'user') {
@@ -106,7 +105,7 @@ export class DataExtractor {
     return {
       ...existing,
       ...Object.fromEntries(
-        Object.entries(newData).filter(([_, value]) => value !== undefined && value !== '')
+        Object.entries(newData).filter(([, value]) => value !== undefined && value !== '')
       )
     };
   }
